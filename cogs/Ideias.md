@@ -1,0 +1,1 @@
+O bot somente responderá quando mencionado ou quando alguém falar Samer (o nome do bot) como se estivesse falando com ele.

@@ -1,0 +1,61 @@
+{
+    "bot": {
+        "nome": "Samélio",
+        "prefixo": "!",
+        "descricao": "Assistente jurídico virtual especializado em direito brasileiro",
+        "versao": "1.0.0",
+        "desenvolvedor": "@sherlockramos.io"
+    },
+    "ia": {
+        "temperatura": 0.9,
+        "top_p": 1,
+        "top_k": 32,
+        "max_tokens": 4096,
+        "modelo_gemini": "gemini-pro",
+        "modelo_imagem": "runwayml/stable-diffusion-v1-5",
+        "personalidade": {
+            "tom": "formal",
+            "estilo": "jurídico",
+            "nivel_tecnico": "moderado"
+        }
+    },
+    "comandos": {
+        "prefixo": "!",
+        "lista": [
+            "advogado",
+            "artigo",
+            "sobre",
+            "ajuda",
+            "ping",
+            "hora",
+            "testar_tudo",
+            "imagem"
+        ]
+    },
+    "citacoes": {
+        "advogado": [
+            "A justiça é o pão do povo. Às vezes está duro, mas sempre alimenta. - Cora Coralina",
+            "O direito não é uma teoria que precisa ser explicada, mas uma experiência que precisa ser vivida. - Oliver W. Holmes",
+            "A advocacia não é profissão para covardes. - Sobral Pinto",
+            "Onde há lei, há justiça e proteção. - Rui Barbosa",
+            "O advogado é o primeiro juiz da causa. - Piero Calamandrei"
+        ]
+    },
+    "respostas": {
+        "tempo_maximo": 30,
+        "tentativas_maximas": 3,
+        "mensagem_erro": "Desculpe, ocorreu um erro ao processar sua solicitação.",
+        "mensagem_timeout": "O tempo limite para resposta foi excedido."
+    },
+    "moderacao": {
+        "filtro_palavroes": true,
+        "filtro_spam": true,
+        "intervalo_mensagens": 5,
+        "max_mensagens_minuto": 10
+    },
+    "logs": {
+        "nivel": "INFO",
+        "salvar_historico": true,
+        "pasta_logs": "./logs"
+    }
+}
