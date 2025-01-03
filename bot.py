@@ -27,8 +27,11 @@ class DiscordBot(commands.Bot):
     async def setup_hook(self):
         """Configurações iniciais do bot"""
         try:
-            await self.load_extension("cogs.gemini_cog")
-            self.logger.info("Cog do Gemini carregado com sucesso!")
+            extension = "cogs.gemini_cog"
+            if await self.load_extension(extension):
+                self.logger.info(f"Cog {extension} carregado com sucesso!")
+            else:
+                self.logger.error(f"Falha ao carregar {extension}")
         except Exception as e:
             self.logger.error("Erro ao carregar cog do Gemini", e)
 

@@ -194,6 +194,8 @@ class GeminiCog(commands.Cog, name="Comandos Gemini"):
             self.logger.error("Erro ao mostrar logs", e)
             await ctx.send("❌ Erro ao recuperar logs")
 
-def setup(bot):
+async def setup(bot):
     """Função de setup do cog"""
-    bot.add_cog(GeminiCog(bot))
+    cog = GeminiCog(bot)
+    await bot.add_cog(cog)
+    return True  # Retorna True para indicar sucesso
