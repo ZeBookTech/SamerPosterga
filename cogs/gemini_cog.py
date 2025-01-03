@@ -114,47 +114,68 @@ class GeminiCog(commands.Cog, name="Comandos Gemini"):
 
     def should_respond(self, message):
         """Verifica se o bot deve responder à mensagem"""
-        # Ignora mensagens de bots (incluindo ele mesmo)
+        # Ignora mensagens de bots
         if message.author.bot:
             return False
 
-        # Ignora mensagens em threads ou DMs onde não foi explicitamente chamado
-        if isinstance(message.channel, (discord.Thread, discord.DMChannel)):
-            if not (self.bot.user in message.mentions or 
-                   message.content.lower().startswith('samer')):
-                return False
-
-        # Responde APENAS se:
-        # 1. O bot foi explicitamente mencionado (@Samer)
-        # 2. A mensagem começa exatamente com "Samer" (case insensitive)
-        content_lower = message.content.lower().strip()
-        return (
-            self.bot.user in message.mentions or
-            content_lower.startswith('samer ')  # Note o espaço após 'samer'
+        # Obtém o conteúdo limpo da mensagem
+        content = message.content.strip().lower()
+        
+        # Verifica menção direta ao bot
+        is_mentioned = self.bot.user.id in [m.id for m in message.mentions]
+        
+        # Verifica se começa com "samer" seguido de espaço ou pontuação
+        starts_with_name = content.startswith('samer ') or \
+                          content.startswith('samer,') or \
+                          content.startswith('samer:') or \
+                          content.startswith('samer?') or \
+                          content.startswith('samer!')
+        
+        # Verifica se é uma resposta a uma mensagem do bot
+        is_reply_to_bot = (
+            message.reference and 
+            message.reference.resolved and 
+            message.reference.resolved.author.id == self.bot.user.id
         )
+        
+        # Só responde se for mencionado ou chamado pelo nome
+        should_respond = is_mentioned or starts_with_name
+        
+        # Loga a decisão para debug
+        if should_respond:
+            self.logger.info(
+                f"Respondendo mensagem | "
+                f"Autor: {message.author} | "
+                f"Conteúdo: {content} | "
+                f"Mencionado: {is_mentioned} | "
+                f"Nome: {starts_with_name}"
+            )
+        
+        return should_respond
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        """Responde automaticamente quando mencionado ou chamado pelo nome"""
+        """Responde apenas quando explicitamente chamado"""
         if not self.should_respond(message):
             return
 
         try:
-            # Remove a menção ao bot ou o nome "Samer" da mensagem
+            # Remove menções e nome do bot
             content = message.content
+            
+            # Remove menções ao bot
             if self.bot.user in message.mentions:
-                # Remove a menção ao bot
-                for mention in message.mentions:
-                    if mention == self.bot.user:
-                        content = content.replace(f'<@{mention.id}>', '').strip()
-            elif content.lower().startswith('samer'):
-                # Remove "samer" do início (apenas se for o primeiro termo)
-                content = ' '.join(content.split()[1:])
-
-            # Se após remover a menção/nome não sobrar conteúdo, não responde
-            if not content.strip():
+                content = content.replace(f'<@{self.bot.user.id}>', '').strip()
+            
+            # Remove "samer" do início se presente
+            if content.lower().startswith('samer'):
+                words = content.split()
+                content = ' '.join(words[1:]).strip()
+            
+            # Se não sobrou conteúdo após limpeza, não responde
+            if not content:
                 return
-
+                
             channel_name = self.get_channel_name(message.channel)
             
             self.logger.info(
