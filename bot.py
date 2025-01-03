@@ -27,8 +27,13 @@ class DiscordBot(commands.Bot):
     async def setup_hook(self):
         """Configurações iniciais do bot"""
         try:
-            # Adiciona comando para gerar link de convite
-            @self.command(name="convite", description="Gera link de convite do bot")
+            # Carrega o cog diretamente
+            from cogs.gemini_cog import GeminiCog
+            await self.add_cog(GeminiCog(self))
+            self.logger.info("Cog do Gemini carregado com sucesso!")
+            
+            # Adiciona comando de convite
+            @self.command(name="convite")
             async def convite(ctx):
                 link = discord.utils.oauth_url(
                     self.user.id,
@@ -40,13 +45,7 @@ class DiscordBot(commands.Bot):
                     scopes=['bot', 'applications.commands']
                 )
                 await ctx.send(f"🔗 Link para me adicionar: {link}")
-            
-            # Carrega o cog
-            success = await self.load_extension("cogs.gemini_cog")
-            if success:
-                self.logger.info("Cog do Gemini carregado com sucesso!")
-            else:
-                self.logger.error("Falha ao carregar cog do Gemini")
+                
         except Exception as e:
             self.logger.error(f"Erro ao carregar cog do Gemini: {str(e)}")
 

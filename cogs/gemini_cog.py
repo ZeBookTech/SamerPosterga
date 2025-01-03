@@ -196,10 +196,4 @@ class GeminiCog(commands.Cog, name="Comandos Gemini"):
 
 async def setup(bot):
     """Função de setup do cog"""
-    try:
-        cog = GeminiCog(bot)
-        await bot.add_cog(cog)
-        return True
-    except Exception as e:
-        print(f"Erro ao carregar GeminiCog: {e}")
-        return False
+    await bot.add_cog(GeminiCog(bot))
