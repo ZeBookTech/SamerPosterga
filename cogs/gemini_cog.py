@@ -24,6 +24,7 @@ class GeminiCog(commands.Cog, name="Comandos Gemini"):
         
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel('gemini-pro')
+        self.chats = {}
         
         self.generation_config = {
             "temperature": 0.9,
@@ -111,13 +112,49 @@ class GeminiCog(commands.Cog, name="Comandos Gemini"):
             self.logger.error(f"Erro ao gerar resposta para usuário {user_id}: {e}", e)
             return "Desculpe, ocorreu um erro. Por favor, tente novamente."
 
+    def should_respond(self, message):
+        """Verifica se o bot deve responder à mensagem"""
+        # Ignora mensagens de bots (incluindo ele mesmo)
+        if message.author.bot:
+            return False
+
+        # Ignora mensagens em threads ou DMs onde não foi explicitamente chamado
+        if isinstance(message.channel, (discord.Thread, discord.DMChannel)):
+            if not (self.bot.user in message.mentions or 
+                   message.content.lower().startswith('samer')):
+                return False
+
+        # Responde APENAS se:
+        # 1. O bot foi explicitamente mencionado (@Samer)
+        # 2. A mensagem começa exatamente com "Samer" (case insensitive)
+        content_lower = message.content.lower().strip()
+        return (
+            self.bot.user in message.mentions or
+            content_lower.startswith('samer ')  # Note o espaço após 'samer'
+        )
+
     @commands.Cog.listener()
     async def on_message(self, message):
-        """Responde automaticamente a todas as mensagens que não sejam comandos ou de bots"""
-        if message.author.bot or message.content.startswith('!'):
+        """Responde automaticamente quando mencionado ou chamado pelo nome"""
+        if not self.should_respond(message):
             return
-            
+
         try:
+            # Remove a menção ao bot ou o nome "Samer" da mensagem
+            content = message.content
+            if self.bot.user in message.mentions:
+                # Remove a menção ao bot
+                for mention in message.mentions:
+                    if mention == self.bot.user:
+                        content = content.replace(f'<@{mention.id}>', '').strip()
+            elif content.lower().startswith('samer'):
+                # Remove "samer" do início (apenas se for o primeiro termo)
+                content = ' '.join(content.split()[1:])
+
+            # Se após remover a menção/nome não sobrar conteúdo, não responde
+            if not content.strip():
+                return
+
             channel_name = self.get_channel_name(message.channel)
             
             self.logger.info(
@@ -127,7 +164,7 @@ class GeminiCog(commands.Cog, name="Comandos Gemini"):
             
             async with message.channel.typing():
                 response = await self.get_gemini_response(
-                    message.content,
+                    content,
                     message.author.id
                 )
                 
